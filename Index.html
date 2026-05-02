@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Queen Bamlak</title>
+    <style>
+        @import url('https://googleapis.com');
+        
+        body { margin: 0; background: #0f0c29; color: white; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+        
+        /* Photo Background Slider */
+        .bg-slider { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; background-size: cover; background-position: center; transition: background-image 2s ease-in-out; }
+
+        .section { display: none; height: 100vh; width: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; background: rgba(15, 12, 41, 0.5); position: relative; }
+        .active { display: flex; animation: fadeIn 0.8s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        h1 { font-family: 'Great Vibes', cursive; font-size: 3rem; color: #ff758c; margin-bottom: 10px; }
+        .btn { background: #ff758c; color: white; border: none; padding: 15px 40px; border-radius: 30px; cursor: pointer; font-weight: 600; width: 220px; margin-top: 30px; }
+
+        /* Floating Memories Style */
+        .floating-mem { position: absolute; background: rgba(255, 117, 140, 0.2); padding: 10px 20px; border-radius: 20px; font-size: 0.8rem; animation: floatMem 10s infinite ease-in-out; }
+        @keyframes floatMem { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, -30px); } }
+
+        /* Fingerprint Scanner Style */
+        .scan-container { width: 150px; height: 150px; border: 3px solid #ff758c; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: 0.3s; }
+        .scan-container:active { transform: scale(0.9); background: rgba(255, 117, 140, 0.3); }
+        .scan-line { position: absolute; width: 100%; height: 2px; background: #ff758c; top: 0; animation: scanMove 2s infinite linear; }
+        @keyframes scanMove { 0% { top: 0; } 100% { top: 100%; } }
+
+        /* Falling Words */
+        .falling-word { position: absolute; color: #ffb3c1; font-family: 'Great Vibes', cursive; font-size: 1.6rem; animation: fallDown linear forwards; opacity: 0; }
+        @keyframes fallDown { 0% { transform: translateY(-10vh); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(110vh); opacity: 0; } }
+
+        #typewriter { font-family: 'Great Vibes', cursive; font-size: 2rem; color: #ff758c; max-width: 85%; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-slider" id="bgSlider"></div>
+
+    <!-- Page 1: Call -->
+    <div id="p1" class="section active" style="background: linear-gradient(to bottom, #434343, #000000);">
+        <div style="font-size: 80px; margin-bottom: 20px;">👤</div>
+        <div style="font-size: 2.2rem; font-weight: 600;">My Love ❤️</div>
+        <button style="width: 80px; height: 80px; border-radius: 50%; background: #4cd964; border: none; color: white; font-size: 2rem; margin-top: 50px; animation: pulse 1.5s infinite;" onclick="go(2)">📞</button>
+    </div>
+
+    <!-- Page 2: Love Map & Floating Memories -->
+    <div id="p2" class="section">
+        <div class="floating-mem" style="top: 10vh; left: 10vw;">Our First Call 📞</div>
+        <div class="floating-mem" style="top: 20vh; right: 15vw;">35hr Together ⏳</div>
+        <div class="floating-mem" style="bottom: 15vh; left: 20vw;">Always in my mind 🧠</div>
+        <h1>Addis to Asella</h1>
+        <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 20px; width: 85%;">
+            <p>"175km apart, but 0km by heart."</p>
+        </div>
+        <button class="btn" onclick="go(3)">Next</button>
+    </div>
+
+    <!-- Page 3: Fingerprint Scan -->
+    <div id="p3" class="section">
+        <h1>Identity Check</h1>
+        <p>Hold your finger to unlock my heart</p>
+        <div class="scan-container" onmousedown="startScan()" onmouseup="stopScan()" ontouchstart="startScan()" ontouchend="stopScan()">
+            <div class="scan-line" id="line"></div>
+            <span style="font-size: 50px;">❤️</span>
+        </div>
+        <p id="scanStatus" style="margin-top: 20px; color: #ff758c;"></p>
+        <button id="scanBtn" class="btn" style="display:none;" onclick="go(4)">Access Granted</button>
+    </div>
+
+    <!-- Page 4: Digital Time Capsule (Falling Words) -->
+    <div id="p4" class="section">
+        <h1>Memory Rain</h1>
+        <div id="capsuleArea" style="width: 100%; height: 60vh; position: relative; overflow: hidden;"></div>
+        <button class="btn" onclick="go(5)">My Thoughts</button>
+    </div>
+
+    <!-- Page 5: Typing Story -->
+    <div id="p5" class="section">
+        <div id="typewriter"></div>
+        <button id="finalBtn" class="btn" style="display:none; margin-top: 40px;" onclick="go(6)">Final Secret</button>
+    </div>
+
+    <!-- Page 6: Final Letter -->
+    <div id="p6" class="section">
+        <div style="background: white; color: #333; padding: 30px; border-radius: 25px; font-family: 'Great Vibes', cursive; font-size: 2.2rem; max-width: 400px;">
+            "Bamlak, I love you forever. ❤️"
+        </div>
+    </div>
+
+    <script>
+        const images = ["photo1.jpg", "photo2.jpg", "photo3.jpg"];
+        let imgIndex = 0;
+        function changeBg() {
+            document.getElementById('bgSlider').style.backgroundImage = `url(${images[imgIndex]})`;
+            imgIndex = (imgIndex + 1) % images.length;
+        }
+        setInterval(changeBg, 4000); changeBg();
+
+        function go(p) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('p' + p).classList.add('active');
+            if(p === 4) startFallingWords();
+            if(p === 5) type();
+        }
+
+        let scanTimer;
+        function startScan() {
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            document.getElementById('scanStatus').innerText = "Scanning Heartbeat...";
+            scanTimer = setTimeout(() => {
+                document.getElementById('scanStatus').innerText = "Biometric Match: You own this heart!";
+                document.getElementById('scanBtn').style.display = "block";
+            }, 3000);
+        }
+        function stopScan() { clearTimeout(scanTimer); if(!document.getElementById('scanBtn').style.display) document.getElementById('scanStatus').innerText = ""; }
+
+        const capsuleWords = ["Kiyaye", "Fkr", "Love", "Enate", "Ema", "My World", "Beautiful", "35 Hours"];
+        function startFallingWords() {
+            const area = document.getElementById('capsuleArea');
+            setInterval(() => {
+                const word = document.createElement('div');
+                word.className = 'falling-word';
+                word.innerHTML = capsuleWords[Math.floor(Math.random() * capsuleWords.length)];
+                word.style.left = Math.random() * 80 + 'vw';
+                const dur = Math.random() * 3 + 4;
+                word.style.animationDuration = dur + 's';
+                area.appendChild(word);
+                setTimeout(() => word.remove(), dur * 1000);
+            }, 700);
+        }
+
+        const text = "Every second I think of you is a treasure. You are my home, Bamlak.";
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                document.getElementById("typewriter").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, 50);
+            } else { document.getElementById("finalBtn").style.display = "inline-block"; }
+        }
+    </script>
+</body>
+</html>
